@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Moon, Mic, MicOff, Send, Calendar, Volume2, VolumeX } from "lucide-react";
+import { Moon, Mic, MicOff, Send, Calendar, VolumeX } from "lucide-react";
 import Link from "next/link";
 
 type TextMessage = {
@@ -213,29 +213,26 @@ export default function ChatInterface() {
   const isInputBusy = isLoading || isTranscribing;
 
   return (
-    <div className="flex flex-col h-screen bg-[#080812]">
+    <div className="flex flex-col h-screen bg-[#030307]">
       {/* Header */}
-      <header className="flex items-center gap-3 px-5 py-4 border-b border-[#1a1a35] shrink-0">
-        <Link href="/" className="flex items-center gap-3 hover:opacity-70 transition-opacity">
-          <Moon className="w-5 h-5 text-violet-400" strokeWidth={1.5} />
-          <span className="text-[#c8c8e4] font-light tracking-widest text-sm">Ruminate</span>
+      <header className="flex items-center gap-2.5 px-6 py-5 shrink-0">
+        <Link href="/" className="flex items-center gap-2.5 opacity-40 hover:opacity-70 transition-opacity">
+          <Moon className="w-4 h-4 text-violet-300" strokeWidth={1.5} />
+          <span className="text-[#aaaacc] font-light tracking-widest text-xs uppercase">Ruminate</span>
         </Link>
         {isSpeaking && (
           <button
             onClick={stopSpeaking}
-            className="ml-auto flex items-center gap-1.5 text-xs text-violet-400 hover:text-violet-300 transition-colors"
+            className="ml-auto opacity-40 hover:opacity-70 transition-opacity"
+            aria-label="Stop speaking"
           >
-            <VolumeX className="w-3.5 h-3.5" />
-            Stop reading
+            <VolumeX className="w-3.5 h-3.5 text-violet-300" />
           </button>
-        )}
-        {!isSpeaking && items.some((i) => i.type === "text" && (i as TextMessage).role === "assistant") && (
-          <Volume2 className="ml-auto w-3.5 h-3.5 text-[#444466]" />
         )}
       </header>
 
       {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-8 space-y-4 max-w-2xl mx-auto w-full">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-6 space-y-6 max-w-xl mx-auto w-full">
         {items.length === 0 && <WelcomeState />}
 
         {items.map((item) => {
@@ -245,12 +242,12 @@ export default function ChatInterface() {
           return <MessageBubble key={item.id} message={item} />;
         })}
 
-        {isInputBusy && <LoadingBubble label={isTranscribing ? "Transcribing..." : undefined} />}
+        {isInputBusy && <LoadingBubble transcribing={isTranscribing} />}
       </div>
 
       {/* Input bar */}
-      <div className="shrink-0 px-4 pb-8 pt-3 border-t border-[#1a1a35]">
-        <div className="flex items-end gap-3 max-w-2xl mx-auto">
+      <div className="shrink-0 px-6 pb-8 pt-4 max-w-xl mx-auto w-full">
+        <div className="flex items-end gap-4">
           <textarea
             ref={textareaRef}
             value={input}
@@ -259,47 +256,34 @@ export default function ChatInterface() {
             placeholder="What's going through your mind…"
             disabled={isInputBusy}
             rows={1}
-            className="flex-1 bg-[#0f0f22] text-[#e0e0f4] rounded-2xl px-4 py-3 resize-none outline-none border border-[#1e1e3a] focus:border-violet-700/50 text-sm leading-relaxed placeholder-[#44446a] disabled:opacity-40 transition-colors"
-            style={{ minHeight: "48px", maxHeight: "120px" }}
+            className="flex-1 bg-transparent text-[#c0c0d8] text-sm leading-relaxed resize-none outline-none placeholder-[#333348] disabled:opacity-30 transition-opacity"
+            style={{ minHeight: "28px", maxHeight: "120px" }}
           />
-
           <button
             onClick={() => sendMessage(input)}
             disabled={!input.trim() || isInputBusy}
-            className="p-3 rounded-full bg-violet-800/70 hover:bg-violet-700 disabled:opacity-25 transition-all shrink-0 border border-violet-700/30"
+            className="opacity-30 hover:opacity-80 disabled:opacity-10 transition-opacity shrink-0 pb-0.5"
             aria-label="Send"
           >
-            <Send className="w-4 h-4 text-[#d4d0ff]" />
+            <Send className="w-4 h-4 text-violet-300" />
           </button>
-
           <button
             onClick={isRecording ? stopRecording : startRecording}
             disabled={isTranscribing || isLoading}
-            className={`p-3 rounded-full transition-all shrink-0 border ${
-              isRecording
-                ? "bg-red-600 border-red-500/50 mic-pulse"
-                : "bg-[#12122a] border-[#1e1e3a] hover:border-violet-700/40 hover:bg-[#18183a]"
-            } disabled:opacity-25`}
+            className={`shrink-0 pb-0.5 transition-all ${
+              isRecording ? "opacity-100 mic-pulse" : "opacity-30 hover:opacity-80"
+            } disabled:opacity-10`}
             aria-label={isRecording ? "Stop recording" : "Start recording"}
           >
             {isRecording ? (
-              <MicOff className="w-4 h-4 text-white" />
+              <MicOff className="w-4 h-4 text-red-400" />
             ) : (
-              <Mic className="w-4 h-4 text-violet-400" />
+              <Mic className="w-4 h-4 text-violet-300" />
             )}
           </button>
         </div>
-
-        {isRecording && (
-          <p className="text-center text-red-400 text-xs mt-2 fade-up">
-            Recording — tap to stop
-          </p>
-        )}
-        {isTranscribing && (
-          <p className="text-center text-[#7a7a9a] text-xs mt-2 fade-up">
-            Transcribing your voice…
-          </p>
-        )}
+        {/* Thin separator line */}
+        <div className="mt-3 h-px bg-[#111120]" />
       </div>
     </div>
   );
@@ -307,12 +291,9 @@ export default function ChatInterface() {
 
 function WelcomeState() {
   return (
-    <div className="text-center py-20 fade-up">
-      <Moon className="w-10 h-10 text-violet-600/30 mx-auto mb-5" strokeWidth={1} />
-      <p className="text-[#555575] text-sm leading-relaxed max-w-xs mx-auto">
-        Can&apos;t sleep? That&apos;s okay.
-        <br />
-        Tell me what&apos;s on your mind — or press the mic and just talk.
+    <div className="text-center pt-24 fade-up">
+      <p className="text-[#2e2e48] text-sm leading-loose">
+        Can&apos;t sleep? Tell me what&apos;s spinning.
       </p>
     </div>
   );
@@ -322,65 +303,61 @@ function MessageBubble({ message }: { message: TextMessage }) {
   const isUser = message.role === "user";
   return (
     <div className={`flex fade-up ${isUser ? "justify-end" : "justify-start"}`}>
-      <div
-        className={`max-w-[82%] px-4 py-3 text-sm leading-relaxed rounded-2xl ${
-          isUser
-            ? "bg-violet-900/50 text-[#ddddf8] border border-violet-800/30 rounded-br-md"
-            : "bg-[#0f0f22] text-[#c8c8e0] border border-[#1a1a35] rounded-bl-md"
-        }`}
-      >
-        {message.content}
-      </div>
+      {isUser ? (
+        <div className="max-w-[78%] px-3.5 py-2.5 bg-[#0c0c1e] text-[#9090b8] text-sm leading-relaxed rounded-2xl rounded-br-sm">
+          {message.content}
+        </div>
+      ) : (
+        <p className="max-w-[88%] text-[#6a6a8a] text-sm leading-loose">
+          {message.content}
+        </p>
+      )}
     </div>
   );
 }
 
 function CalendarCard({ event }: { event: CalendarItem }) {
   return (
-    <div className="flex justify-center fade-up">
-      <div className="bg-[#0d0d24] border border-violet-900/50 rounded-2xl px-5 py-4 max-w-sm w-full">
-        <div className="flex items-center gap-2 mb-3">
-          <Calendar className="w-3.5 h-3.5 text-violet-400" />
-          <span className="text-violet-400 text-xs font-medium uppercase tracking-widest">
-            Calendar reminder
-          </span>
+    <div className="fade-up">
+      <div className="border border-[#111128] rounded-xl px-4 py-3.5 max-w-xs">
+        <div className="flex items-center gap-1.5 mb-2 opacity-40">
+          <Calendar className="w-3 h-3 text-violet-300" />
+          <span className="text-violet-300 text-xs tracking-widest uppercase">reminder</span>
         </div>
-        <p className="text-[#e0e0f4] text-sm font-medium mb-1">{event.title}</p>
-        <p className="text-[#666688] text-xs mb-4">
-          {event.date} &nbsp;at&nbsp; {event.time}
-          {event.duration_minutes ? ` · ${event.duration_minutes} min` : ""}
+        <p className="text-[#888898] text-sm mb-0.5">{event.title}</p>
+        <p className="text-[#333348] text-xs mb-3">
+          {event.date} · {event.time}
+          {event.duration_minutes ? ` · ${event.duration_minutes}m` : ""}
         </p>
         <a
           href={event.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="block w-full text-center py-2 px-4 bg-violet-800/60 hover:bg-violet-700/80 text-[#d4d0ff] text-xs rounded-xl transition-colors border border-violet-700/30"
+          className="text-violet-400/60 hover:text-violet-300 text-xs transition-colors"
         >
-          Add to Google Calendar
+          Add to Google Calendar →
         </a>
       </div>
     </div>
   );
 }
 
-function LoadingBubble({ label }: { label?: string }) {
+function LoadingBubble({ transcribing }: { transcribing: boolean }) {
   return (
     <div className="flex justify-start fade-up">
-      <div className="bg-[#0f0f22] border border-[#1a1a35] rounded-2xl rounded-bl-md px-5 py-4">
-        {label ? (
-          <p className="text-[#555575] text-xs">{label}</p>
-        ) : (
-          <div className="flex gap-1.5 items-center">
-            {[0, 150, 300].map((delay) => (
-              <span
-                key={delay}
-                className="w-1.5 h-1.5 rounded-full bg-violet-500/50 animate-bounce"
-                style={{ animationDelay: `${delay}ms` }}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+      {transcribing ? (
+        <p className="text-[#2e2e48] text-xs">transcribing…</p>
+      ) : (
+        <div className="flex gap-1.5 items-center pt-1">
+          {[0, 160, 320].map((delay) => (
+            <span
+              key={delay}
+              className="w-1 h-1 rounded-full bg-[#333350] animate-bounce"
+              style={{ animationDelay: `${delay}ms` }}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
